@@ -1,5 +1,3 @@
-# comment!
-
 # variable
 # variable = "whatever the variable is"
 # #x = 0
