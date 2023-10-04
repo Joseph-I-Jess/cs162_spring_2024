@@ -1,3 +1,3 @@
-# This is a readme file for my main CS162 repository folder#
+# This is a readme file for my main CS162 repository folder
 
-## Some stuff##
+## Some stuff in heading 2
