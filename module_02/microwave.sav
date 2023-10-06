@@ -1,0 +1,5 @@
+name: Joseph's microwave
+volume: 6
+volume_units: cubic meters
+wattage: 9900
+wattage_units: watts
