@@ -17,6 +17,7 @@ class GuiBasics:
         # root of GUI
         self.root = tk.Tk()
         self.root.minsize(800, 600)
+        self.root.protocol("WM_DELETE_WINDOW", self.cleanup)
 
         # label
         # self.label = tk.Label(self.root, text="this is a label")
@@ -42,10 +43,23 @@ class GuiBasics:
         self.partner_button = tk.Button(self.root, text="Update Partner", command=self.update_partner_gui_label)
         self.partner_button.grid(column=0, row=3)
 
+        # swap windows button
+        self.show_partner_button = tk.Button(self.root, text="Show Partner window", command=self.show_partner)
+        self.show_partner_button.grid(column=0, row=4)
+
         # entry (text box)
         self.entry_stringvar = tk.StringVar(self.root, "This is a stringvar!")
         # print(f"self.entry_stringvar immediately after creation: {self.entry_stringvar.get()}")
         self.entry = tk.Entry(self.root, textvariable=self.entry_stringvar, width=100)
+        #self.entry.bind("<Return>", lambda event : self.label.config(text=self.entry_stringvar.get()+f"event.keycode: {event.keycode}"))
+        #self.entry.bind("<KeyPress>", lambda event : self.label.config(text=self.entry_stringvar.get()+f"event.keycode: {event.keycode}"))
+        self.entry.bind("w", lambda event : self.label.config(text=self.entry_stringvar.get()+f"event.keycode: {event.keycode}"))
+        self.entry.bind("a", lambda event : self.label.config(text=self.entry_stringvar.get()+f"event.keycode: {event.keycode}"))
+        self.entry.bind("s", lambda event : self.label.config(text=self.entry_stringvar.get()+f"event.keycode: {event.keycode}"))
+        self.entry.bind("d", lambda event : self.label.config(text=self.entry_stringvar.get()+f"event.keycode: {event.keycode}"))
+        # add additional handlers to a key binding with the third field in the bind method
+        self.entry.bind("d", lambda event : print(f"event.keycode: {event.keycode}"), True)
+
         # insert also works!
         # entry.insert(0, "hello?01234567890123456789012345678901234567890123456789")
         self.entry.grid(column=1, row=2)
@@ -58,6 +72,26 @@ class GuiBasics:
         self.button_one_clicks = 0
 
         self.partner_gui:GuiBasics = None
+
+        # set initial focus
+        # does not work here...?
+        self.entry.focus_set()
+
+    # does not do what we want, find work around...
+    # def __del__(self):
+    #     """On this object's deletion, destroy partner_gui...?"""
+    #     self.partner_gui.root.destroy()
+
+    def cleanup(self):
+        """Clean up child objects."""
+        print("cleaning up!")
+        if self.partner_gui is not None:
+            # clean up partner
+            self.partner_gui.root.destroy()
+            # we discovered that we do not have to delete the containing object, we just need to destroy toplevel widgets
+            # del self.partner_gui
+        # clean up self
+        self.root.destroy()
 
     def button_clicked(self, new_text="no new text was entered"):
         # print("button clicked!")
@@ -85,6 +119,11 @@ class GuiBasics:
         else:
             self.partner_gui.button_one_clicks = self.button_one_clicks
             self.partner_gui.update_label(self.button_one_clicks)
+
+    def show_partner(self):
+        """Show partner window, hide this object's window."""
+        self.partner_gui.root.deiconify()
+        self.root.withdraw()
 
     def mainloop(self):
         """Start this GUI in a window."""
