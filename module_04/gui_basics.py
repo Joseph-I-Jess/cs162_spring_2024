@@ -73,6 +73,37 @@ class GuiBasics:
 
         self.partner_gui:GuiBasics = None
 
+        #Tkinter canvas
+        self.canvas = tk.Canvas(self.root, width=800, height=400, bg="#0FF")
+        self.canvas.grid(row=5, column=1)
+        self.canvas.create_rectangle(10, 10, 30, 40, fill="#900")
+        self.canvas.create_oval(30, 10, 50, 40, fill="#F0F")
+
+        #rgb buttons for that first rectangle
+        self.red_plus = tk.Button(self.root, text="+", command=lambda: self.red_modify(1))
+        self.red_plus.grid(row=6, column=0)
+        self.red_minus = tk.Button(self.root, text="-", command=lambda: self.red_modify(-1))
+        self.red_minus.grid(row=7, column=0)
+
+        self.green_plus = tk.Button(self.root, text="+", command=lambda: self.green_modify(1))
+        self.green_plus.grid(row=6, column=1)
+        self.green_minus = tk.Button(self.root, text="-", command=lambda: self.green_modify(-1))
+        self.green_minus.grid(row=7, column=1)
+
+        self.blue_plus = tk.Button(self.root, text="+", command=lambda: self.blue_modify(1))
+        self.blue_plus.grid(row=6, column=2)
+        self.blue_minus = tk.Button(self.root, text="-", command=lambda: self.blue_modify(-1))
+        self.blue_minus.grid(row=7, column=2)
+
+        self.move_rectangle_right = tk.Button(self.root, text="move rect right", command=lambda: self.move(x=1))
+        self.move_rectangle_right.grid(row=8, column=0)
+        self.move_rectangle_left = tk.Button(self.root, text="move rect left", command=lambda: self.move(x=-1))
+        self.move_rectangle_left.grid(row=9, column=0)
+        self.move_rectangle_up = tk.Button(self.root, text="move rect up", command=lambda: self.move(y=-1))
+        self.move_rectangle_up.grid(row=8, column=1)
+        self.move_rectangle_down = tk.Button(self.root, text="move rect down", command=lambda: self.move(y=1))
+        self.move_rectangle_down.grid(row=9, column=1)
+
         # set initial focus
         # does not work here...?
         self.entry.focus_set()
@@ -124,6 +155,57 @@ class GuiBasics:
         """Show partner window, hide this object's window."""
         self.partner_gui.root.deiconify()
         self.root.withdraw()
+
+    def red_modify(self, amount=1):
+        """Make canvas object more red by amount."""
+        current_fill = self.canvas.itemcget(1, "fill")
+        
+        # Algorithm to increase a hexadecimal value in a string
+        current_red = int(current_fill[1], 16)
+        current_red += amount
+        if current_red > 15:
+            current_red = 15
+        elif current_red < 0:
+            current_red = 0
+        current_red = hex(current_red)
+
+        print(f"current_red: {current_red}")
+        self.canvas.itemconfigure(1, fill=f"#{current_red[2]}{current_fill[2:]}")
+
+    def green_modify(self, amount=1):
+        """Make canvas object more green by amount."""
+        current_fill = self.canvas.itemcget(1, "fill")
+        
+        # Algorithm to increase a hexadecimal value in a string
+        current_green = int(current_fill[2], 16)
+        current_green += amount
+        if current_green > 15:
+            current_green = 15
+        elif current_green < 0:
+            current_green = 0
+        current_green = hex(current_green)
+
+        print(f"current_green: {current_green}")
+        self.canvas.itemconfigure(1, fill=f"#{current_fill[1]}{current_green[2]}{current_fill[3]}")
+
+    def blue_modify(self, amount=1):
+        """Make canvas object more blue by amount."""
+        current_fill = self.canvas.itemcget(1, "fill")
+        
+        # Algorithm to increase a hexadecimal value in a string
+        current_blue = int(current_fill[3], 16)
+        current_blue += amount
+        if current_blue > 15:
+            current_blue = 15
+        elif current_blue < 0:
+            current_blue = 0
+        current_blue = hex(current_blue)
+
+        print(f"current_blue: {current_blue}")
+        self.canvas.itemconfigure(1, fill=f"#{current_fill[1]}{current_fill[2]}{current_blue[2]}")
+
+    def move(self, x=0, y=0):
+        self.canvas.move(1, x, y)
 
     def mainloop(self):
         """Start this GUI in a window."""
