@@ -18,7 +18,7 @@ value = int(input(f"Please enter an integer from {min_val} through {max_val}: ")
 for index,element in enumerate(my_list):
     # print(f"index: {index}, value: {element}")
     if value == element:
+        # report to user where that value is in the list
         print(f"found your value ({value}) at index: {index}")
 
-# report to user where that value is in the list
 
