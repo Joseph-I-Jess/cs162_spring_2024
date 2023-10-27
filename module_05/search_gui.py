@@ -61,10 +61,6 @@ class SearchGui:
     def mainloop(self):
         """Pass mainloop call on to this GUI's Toplevel object."""
         self.root.mainloop()
-
-    def highlight_rectangle(self, index, color):
-        """Highlight item with index in canvas with color after a delay."""
-        self.canvas.itemconfig(index, fill=color)
     
     def search(self):
         """Find all instances of rectangles.
@@ -96,7 +92,7 @@ class SearchGui:
             height = y1 - y0
 
             # debug
-            print(f"height at index {index}: {height}")
+            # print(f"height at index {index}: {height}")
 
             # Highlight this rectangle with either a matched color or a non-match color.
             delay = 100 * index
