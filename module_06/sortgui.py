@@ -116,7 +116,7 @@ class SortGui:
 
 
     def sort_step(self, current_index):
-        """Helper method that perform one step in a selection sort algorithm at the given current_index and return the index of the smallest hight rectangle in the canvas."""
+        """Helper method that perform one step in a selection sort algorithm at the given current_index (a canvas id) and return the index of the smallest height rectangle in the canvas."""
         # find index of rectangle with smallest height in the list remaining to be sorted
         # first index in list to be sorted has the smallest height so far
         smallest_index_so_far = current_index
