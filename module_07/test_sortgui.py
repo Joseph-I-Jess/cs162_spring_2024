@@ -7,6 +7,7 @@ import sortgui
 def test_mainloop():
     initial_list = [10]
     sg = sortgui.SortGui(initial_list)
+    sg.populate_canvas()
 
     expected_height = initial_list[0] * sg.value_multiplier
 
@@ -25,6 +26,7 @@ def test_default_sortgui():
     # setup default object to be tested
     initial_list = [10, 20, 30]
     sg = sortgui.SortGui(initial_list)
+    sg.populate_canvas()
     ###############################################################################################
 
 
@@ -64,7 +66,7 @@ def test_update_sleep():
     expected_sleep_delay = 1.1
 
     # update sleep delay
-    sg.search_input.insert(0, expected_sleep_delay)
+    sg.sleep_duration_input.insert(0, expected_sleep_delay)
     sg.update_sleep(None)
 
     # get actual sleep delay
@@ -84,7 +86,7 @@ def test_update_sleep_exception():
     expected_sleep_delay = "cats"
 
     # update sleep delay
-    sg.search_input.insert(0, expected_sleep_delay)
+    sg.sleep_duration_input.insert(0, expected_sleep_delay)
     with pytest.raises(ValueError):
         sg.update_sleep(None)
 
@@ -96,6 +98,7 @@ def test_swap_height_of_indices():
     # setup object to be tested
     initial_list = [10, 20]
     sg = sortgui.SortGui(initial_list)
+    sg.populate_canvas()
 
     # grab height of rectangles initially
     initial_coords_1 = sg.canvas.coords(sg.rectangle_indices[0])
@@ -126,6 +129,7 @@ def test_sort_step():
     smallest_value = 10
     initial_list = [smallest_value, 20]
     sg = sortgui.SortGui(initial_list)
+    sg.populate_canvas()
 
     # expected canvas id with smallest height in pixels
     expected_smallest_index = 1
@@ -144,8 +148,9 @@ def test_sort():
     # setup object to be tested
     initial_list = [20, 30, 10]
     sg = sortgui.SortGui(initial_list)
+    sg.populate_canvas()
     # update sleep delay
-    sg.search_input.insert(0, 0.001)
+    sg.sleep_duration_input.insert(0, 0.001)
     sg.update_sleep(None)
 
     # sleep because of TK not being fast enough... this is a hack!!!

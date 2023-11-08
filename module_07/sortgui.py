@@ -4,6 +4,8 @@ import time # for sleep
 import tkinter as tk # lots of GUI widgets
 # from tkinter import messagebox # for showinfo message box, no longer used
 
+import rectangle
+
 class SortGui:
     """Create a GUI that can be manipulated to show sorting algorithms."""
 
@@ -14,6 +16,8 @@ class SortGui:
         #########################################################################
         # The list of values for our initially drawn rectangles.
         self.values = initial_values
+        # rectangle objects
+        self.rectangles: list[rectangle.Rectangle] = []
         # A list of indices that are related to the canvas rectangles created later in this code.
         self.rectangle_indices = []
         self.sleep_delay = 0.5
@@ -35,13 +39,17 @@ class SortGui:
         self.canvas.grid(row=0, column=0)
 
         # create entry for user input, to be used for seraching algorithms
-        self.search_input = tk.Entry(self.root)
-        self.search_input.bind("<Return>", self.update_sleep)
-        self.search_input.grid(row=1, column=0)
+        self.sleep_duration_input = tk.Entry(self.root)
+        self.sleep_duration_input.bind("<Return>", self.update_sleep)
+        self.sleep_duration_input.grid(row=1, column=0)
 
         # create button to later start the search process
         self.start_sort_button = tk.Button(self.root, text="start sort", command=self.sort)
         self.start_sort_button.grid(row=1, column=1)
+
+        # create button to later draw rectangles on the canvas
+        self.populate_button = tk.Button(self.root, text="draw rectangles", command=self.populate_canvas)
+        self.populate_button.grid(row=2, column=1)
 
         # initialize rectangles on GUI
         self.rect_width = 20
@@ -58,8 +66,21 @@ class SortGui:
             y0 = self.y_offset # a bit useless
             x1 = x0 + self.rect_width
             y1 = y0 + value * self.value_multiplier
+            new_rectangle = rectangle.Rectangle(x0, y0, x1, y1, self.unchecked_value_highlight, "red")
+            self.rectangles.append(new_rectangle)
             
-            self.rectangle_indices.append(self.canvas.create_rectangle(x0, y0, x1, y1, fill=self.unchecked_value_highlight))
+            # self.rectangle_indices.append(self.canvas.create_rectangle(x0, y0, x1, y1, fill=self.unchecked_value_highlight))
+            # new_rectangle.canvas_id = self.canvas.create_rectangle(new_rectangle.x0, new_rectangle.y0, new_rectangle.x1, new_rectangle.y1, fill=new_rectangle.fill, outline=new_rectangle.outline)
+            # self.rectangle_indices.append(new_rectangle.canvas_id)
+
+    def populate_canvas(self):
+        """Actually draw rectangles and fill in rectangle_indices list and disable the button."""
+        self.populate_button["state"] = "disabled"
+
+        for rect in self.rectangles:
+            # rect.canvas_id = self.canvas.create_rectangle(rect.x0, rect.y0, rect.x1, rect.y1, fill=rect.fill, outline=rect.outline)
+            rect.canvas_id = rect.draw_yo_self(self.canvas)
+            self.rectangle_indices.append(rect.canvas_id)
 
         # debug to test swap_height_of_indices method in simple context
         # self.test_swap_button = tk.Button(self.root, text="swap height of rectangle_indices[0] and rectangle_indices[1]", command=lambda: self.swap_height_of_indices(self.rectangle_indices[0], self.rectangle_indices[1]))
@@ -75,7 +96,7 @@ class SortGui:
 
     def update_sleep(self, event):
         try:
-            self.sleep_delay = float(self.search_input.get())
+            self.sleep_delay = float(self.sleep_duration_input.get())
         except ValueError:
             print(f"Value error occurred, try a floating point value in the enrty box instead!")
             raise ValueError
