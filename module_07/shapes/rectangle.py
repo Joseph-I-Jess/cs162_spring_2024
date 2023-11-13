@@ -8,7 +8,7 @@ class Rectangle(shape.Shape):
         super().__init__(x0, y0, x1, y1, fill, outline)
 
     def get_area(self):
-        """Calculate and return are aof rectangle."""
+        """Calculate and return area of rectangle."""
         width = self.x1 - self.x0
         height = self.y1 - self.y0
 
