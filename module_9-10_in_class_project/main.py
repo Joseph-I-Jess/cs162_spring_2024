@@ -5,11 +5,12 @@ import player
     decide on in-class project (example final project)
         text-based RPG with graphical view (try to create both a top-down map view and a first-person view?)
     design in-class project
-        - entity?    
+        - entity
+            -- .maybe change additional attributes of the __str__ method to be a list of categories and a list of list of tuple of (str, str)?
             - being:
                 - .player (attack, defense, special ability bar (timer?))
                 - enemy (should they move, patrol or random, should they follow the player after seeing or engaging in combat with them, ...?)
-                - combat system, experience, equipment system
+                -- combat system, experience, equipment system
             - item: items, weapons, armors, currencies
                 - .can be equippable (equipment)
                     - .equipment slot (weapon, armor, accessory)
@@ -29,7 +30,7 @@ import player
                 - for map_cells
         - command interpreter!
         - GUI
-            - stuff...!
+            -- stuff...!
     start to implement project
         .
 
