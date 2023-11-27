@@ -1,4 +1,10 @@
+from __future__ import annotations
+
+# import primitives first!
 import item
+
+# import complex classes after primitives
+import enemy
 import player
 
 """ToDo:
@@ -9,6 +15,7 @@ import player
             -- .maybe change additional attributes of the __str__ method to be a list of categories and a list of list of tuple of (str, str)?
             - being:
                 - .player (attack, defense, special ability bar (timer?))
+                  -- consider removing equipment and inventory from __init__...
                 - enemy (should they move, patrol or random, should they follow the player after seeing or engaging in combat with them, ...?)
                 -- combat system, experience, equipment system
             - item: items, weapons, armors, currencies
@@ -112,7 +119,7 @@ def main():
     print("Equipping accessory") 
     item_accessory = item.Item(name="ring of power", description="the one ring", is_equippable=True, equipment_slot="accessory", stats={"attack":2, "defence":2, "speed":2, "health":10})
     p1.add_item(item_accessory)
-    p1.equip(item_accessory)
+    print(f"result from: p1.equip(item_accessory): {p1.equip(item_accessory)}")
     print(f"p1:\n___________________________________________________________\n{p1}___________________________________________________________\n")
 
 
@@ -138,6 +145,45 @@ def main():
 
     # # did p1 and p2 have a shared inventory!?!  They did once I added deafult parameters of {} or [] (empty dictionary or empty list as default parameter means all instances share the same initially-empty dictionary or list)
     # print(f"p2:\n___________________________________________________________\n{p2}___________________________________________________________\n")
+
+    e1 = enemy.Enemy(name="goblin", description="a small weak goblin", stats={"attack": 5, "defence": 1, "health": 9, "experience": 1})
+    print(f"e1:\n___________________________________________________________\n{e1}___________________________________________________________\n")
+    # test positive attack case
+    # print(f"results from first p1.attack(e1): {p1.attack(e1)}")
+    # print(f"results from second p1.attack(e1): {p1.attack(e1)}")
+
+    # (fixed!) test attack case where target has no defence stat
+    # print(f"results from p1.attack(item_coin): {p1.attack(item_coin)}")
+
+    # simulate continuous combat
+    rounds = 0
+    while p1.stats["health"] > 0 and e1.stats["health"] > 0:
+        rounds += 1
+        print(f"round {rounds}")
+        print(p1.fight(e1))
+    # end combat simulation
+
+    # verify experience award
+    print(f"p1:\n___________________________________________________________\n{p1}___________________________________________________________\n")    
+    
+    # create another enemy, this time with an item
+    item_dagger = item.Item(name="dagger", description="a tiny dagger", is_equippable=True, equipment_slot="weapon", stats={"attack":1})
+    item_coin3 = item.Item(name="yet more coins", description="another stack of coins")
+    e2 = enemy.Enemy(name="goblin", description="a small weak goblin", stats={"attack": 5, "defence": 1, "health": 9, "experience": 1}, inventory=[item_dagger])
+    e2.add_item(item_coin3)
+    e2.equip(item_dagger)
+
+    # simulate continuous combat again?
+    rounds = 0
+    while p1.stats["health"] > 0 and e2.stats["health"] > 0:
+        rounds += 1
+        print(f"round {rounds}")
+        print(p1.fight(e2))
+    # end combat simulation
+
+    # verify experience and item award again!?!
+    print(f"p1:\n___________________________________________________________\n{p1}___________________________________________________________\n")    
+    print(f"e2:\n___________________________________________________________\n{e2}___________________________________________________________\n")    
 
 if __name__ == "__main__":
     main()

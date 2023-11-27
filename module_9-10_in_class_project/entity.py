@@ -19,8 +19,15 @@ class Entity:
         self.name: str = name
         self.description: str = description
         # maybe we should make a stats class to handle complex issues with stat representation....
-        self.valid_stats: list[str] = ["attack", "defence", "speed", "health"]
-        self.stats: dict[str, int] = stats
+        self.valid_stats: list[str] = ["attack", "defence", "speed", "health", "experience"]
+        self.stats: dict[str, int] = {}
+        for stat in self.valid_stats:
+            self.stats[stat] = 0
+        for stat_name,stat in stats.items():
+            if stat_name in self.valid_stats:
+                self.stats[stat_name] = stat
+            else:
+                print(f"{name} has a stat ({stat_name}) that is not listed in the valid stats for this entity, did you mean to create it first?\n\t valid stats are: {self.valid_stats}")
 
         if equipment is None:
             self.equipment: dict[str, item.Item] = {}
@@ -74,7 +81,8 @@ class Entity:
         if len(self.stats) > 0:
             result += f"\tStats:\n"
             for stat_name,stat in self.stats.items():
-                result += f"\t\t{stat_name}: {stat}\n"
+                if stat > 0:
+                    result += f"\t\t{stat_name}: {stat}\n"
         
         if len(self.equipment) > 0:
             result += f"\tEquipment:\n"
@@ -98,19 +106,37 @@ class Entity:
 
         return result
     
-    def add_item(self, item: item.Item | None=None) -> str:
+    def add_item(self, proposed_item: item.Item | None=None) -> str:
         """Add item to this Entity's inventory if it is not None."""
-        result = ""
-        if item is not None:
-            self.inventory.append(item)
-            result += f"{item.name} has been added to {self.name}'s inventory."
+        result: str = ""
+        if proposed_item is not None:
+            self.inventory.append(proposed_item)
+            result += f"{proposed_item.name} has been added to {self.name}'s inventory."
         else:
             result += "that item is None, did you forget to pass an actual object into the add_item method?"
         
         return result
     
+    def remove_item(self, proposed_item: item.Item | None=None) -> str:
+        """Remove item from this Entity's inventory if it is not None."""
+        result: str = ""
+        if proposed_item is not None:
+            # find item in inventory if it is indeed in there
+            found_item: item.Item | None = None
+            for index,current_item in enumerate(self.inventory):
+                if current_item.id == proposed_item.id:
+                    found_item = self.inventory.pop(index)
+            if found_item is not None:
+                result += f"{proposed_item.name} has been removed from {self.name}'s inventory."
+            else:
+                result += f"{proposed_item.name} was not found in {self.name}'s inventory."
+        else:
+            result += "that item is None, did you forget to pass an actual object into the remove_item method?"
+        
+        return result
+    
     def equip(self, item_proposed: item.Item | None=None):
-        """Attempt to equip item on this player, taking into account equipment slots..."""
+        """Attempt to equip item on this entity, taking into account equipment slots..."""
         result: str = ""
         if item_proposed is not None:
             if item_proposed.is_equipped is False:
@@ -129,7 +155,10 @@ class Entity:
                     self.equipment[item_proposed.equipment_slot] = item_proposed
                     item_proposed.is_equipped = True
                     for item_stat_name,item_stat in item_proposed.stats.items():
-                        self.stats[item_stat_name] += item_stat
+                        if item_stat_name in self.stats:
+                            self.stats[item_stat_name] += item_stat
+                        else:
+                            self.stats[item_stat_name] = item_stat
                 else:
                     result = f"{item_proposed.name}({item_proposed.equipment_slot}) is not equippable"
             else:
@@ -137,4 +166,69 @@ class Entity:
         else:
             result = "That item is None, you cannot equip it, did you forget to pass an actual item to the equip method?"
 
+        return result
+    
+    def unequip(self, item_proposed: item.Item | None=None):
+        """Attempt to unequip item on this entity."""
+        result: str = ""
+        if item_proposed is not None:
+            if item_proposed.is_equipped is True:
+                if item_proposed.equipment_slot in self.equipment:
+                    current_equip: item.Item | None = self.equipment[item_proposed.equipment_slot]
+                    if current_equip is not None:
+                        # unequip old item and reduce stats!
+                        del self.equipment[item_proposed.equipment_slot]
+                        current_equip.is_equipped = False
+                        for item_stat_name,item_stat in current_equip.stats.items():
+                            self.stats[item_stat_name] -= item_stat
+            else:
+                result = f"{item_proposed.name} is not equipped, did you mean to equip it?"
+        else:
+            result = "That item is None, you cannot unequip it, did you forget to pass an actual item to the unequip method?"
+
+        return result
+    
+    def attack(self, target: Entity) -> str:
+        """This entity attacks target entity, calculating expected damage and returning the results of the attack as a human-readable string."""
+        # String to be returned summarizing the attack.
+        base_result: str = ""
+        additional_result: str = ""
+
+        # calculate proposed damage and clamp to 0 if needed
+        proposed_damage: int = self.stats["attack"] - target.stats["defence"]
+        if proposed_damage < 0:
+            proposed_damage = 0
+        
+        # Actually deal proposed damage!
+        target.stats["health"] -= proposed_damage
+
+        # Also report if target entity is defeated!
+        if target.stats["health"] <= 0:
+            target.stats["health"] = 0
+            additional_result = f"\twhich defeats the {target.name} and awards {target.stats['experience']} experience to {self.name}!\n"
+            # award experience, ...
+            self.stats["experience"] += target.stats["experience"]
+            # "drop" items into player inventory (later drop things on the ground of the target's location)
+            # Note!: remember to not modify you list while you are walking through it!
+            #   Build a list of item references in one phase, and then remove from the target list and add to the self list in a second phase
+            items_to_be_removed = []
+            for item in target.inventory:
+                additional_result += self.add_item(item)
+                items_to_be_removed.append(item)
+            for item in items_to_be_removed:
+                if item.is_equipped:
+                    target.unequip(item)
+                print(f"target.remove_item({item}): {target.remove_item(item)}")
+        
+        # Start generating result string based on proposed damage.
+        base_result = f"{self.name} deals {proposed_damage} damage to {target.name}, leaving {target.stats['health']} in remaining health for {target.name}.\n"
+
+
+        return base_result + additional_result
+
+    def fight(self, target:Entity) -> str:
+        """Perform one round of combat between self and target."""
+        result: str = ""
+        result += f"{self.name} attacks {target.name}: {self.attack(target)}\n"
+        result += f"{target.name} attacks {self.name}: {target.attack(self)}\n"
         return result
