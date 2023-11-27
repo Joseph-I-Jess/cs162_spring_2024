@@ -31,6 +31,7 @@ import player
                         - floor
                         - wall(s)
                         - ceiling
+                        !-- have defeated enemies drop items onto map_cell floor, rather than directly into player inventory (go modify entity.Entity.attack method!)
         - inventory (for both beings, but also environmental things such as treasure chests or other containers)
                 - .for players
                 - .for items
