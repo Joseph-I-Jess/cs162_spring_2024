@@ -1,13 +1,13 @@
-"""Represent an enemy in our game."""
+"""Represent beings in this game."""
 
 from __future__ import annotations
 
+import entity
 import item
-import being
-import map_cell
+# import map_cell # import map_cell causes circular import, even though it is only used for type hints
 
-class Enemy(being.Being):
-    """Represent an enemy in our game."""
+class Being(entity.Entity):
+    """A being in this game..."""
     def __init__(self,
                  id: int=0,
                  name: str="unnamed enemy",
@@ -15,6 +15,6 @@ class Enemy(being.Being):
                  stats: dict[str, int]={"attack":0, "defence": 0, "speed": 0, "health": 0},
                  equipment: dict[str, item.Item] | None=None,
                  inventory: list[item.Item] | None=None,
-                 location: map_cell.MapCell | None=None
+                 location=None
                  ) -> None:
         super().__init__(id, name, description, stats, equipment, inventory, location)

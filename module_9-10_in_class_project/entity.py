@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 import item
+# import map_cell # import map_cell causes circular import, even though it is only used for type hints
 
 class Entity:
     """An "abstract" class that contains common attributes among different game entities."""
 
     def __init__(self,
                  id: int=0,
-                 name: str="unnamed player",
-                 description: str="undescribed player",
+                 name: str="unnamed entity",
+                 description: str="undescribed entity",
                  stats: dict[str, int]={},
                  equipment: dict[str, item.Item] | None=None,
-                 inventory: list[item.Item] | None=None,) -> None:
+                 inventory: list[item.Item] | None=None,
+                 location=None # None represents an object existing in the game but not yet being placed in the game
+                 ) -> None:
         """Initialize this "object", likely only used to set base values for subclasses."""
         self.id: int = id
         self.name: str = name
@@ -21,6 +24,8 @@ class Entity:
         # maybe we should make a stats class to handle complex issues with stat representation....
         self.valid_stats: list[str] = ["attack", "defence", "speed", "health", "experience"]
         self.stats: dict[str, int] = {}
+        
+        # set all default stats to 0 if not otherwise given
         for stat in self.valid_stats:
             self.stats[stat] = 0
         for stat_name,stat in stats.items():
@@ -39,12 +44,19 @@ class Entity:
         else:
             self.inventory: list[item.Item] = inventory # if this item has an inventory...
 
-    def __str__(self, additional_attributes_categorical_names: list[str | None] | None=None, additional_attributes_list: list[list[tuple[str, str]]] | None=None) -> str:
+        self.location = location
+
+    def __str__(self, additional_attributes_categorical_names: list[str | None] | None=None, additional_attributes_list: list[list[tuple[str | None, str | None]]] | None=None) -> str:
         """Human readable formatted data of this object.
         
-            @param: additional_attributes is a dictionary where keys are the name of an attribute to be added and the values are the value associated with that added attribute.
+            @param: additional_attributes_categorical_names is a list of categorical names to be printed before the associated list of additional attributes
+            @param: additional_attributes_list is a dictionary where keys are the name of an attribute to be added and the values are the value associated with that added attribute.
         """
         result: str =  f"Name: {self.name}:\n"
+        if self.location is not None:
+            result += f"\tlocation: {self.location.name}\n"
+        else:
+            result += f"\tlocation: nowhere...\n"
         result += f"\tDescription: {self.description}\n"
         
         # if no additional attributes, then do not print anything else
@@ -57,7 +69,7 @@ class Entity:
                         additional_attributes_categorical_name: str | None = additional_attributes_categorical_names[count]
                     else:
                         additional_attributes_categorical_name = None
-                    additional_attributes: list[tuple[str, str]] = additional_attributes_list[count]
+                    additional_attributes: list[tuple[str | None, str | None]] = additional_attributes_list[count]
                     # reset, as each list might or might not have a categorical name
                     additional_attributes_tab_level = "\t"
                     # if categorical name is not none, then increase tab level to nest under categorical name
@@ -77,8 +89,16 @@ class Entity:
                 for additional_attributes in additional_attributes_list:
                     for attribute_name, attribute_value in additional_attributes:
                             result += f"{additional_attributes_tab_level}{attribute_name}: {attribute_value}\n"
+        
+        # check for any stat that is non-zero, otherwise do not even display the line for stats categorical name
+        non_zero_stat: bool = False
+        for stat in self.stats.values():
+            if stat > 0:
+                non_zero_stat = True
+                break
 
-        if len(self.stats) > 0:
+        # only print stats string if at least one stat is non-zero and implicitly stats having a length
+        if len(self.stats) > 0 and non_zero_stat:
             result += f"\tStats:\n"
             for stat_name,stat in self.stats.items():
                 if stat > 0:
@@ -211,14 +231,15 @@ class Entity:
             # "drop" items into player inventory (later drop things on the ground of the target's location)
             # Note!: remember to not modify you list while you are walking through it!
             #   Build a list of item references in one phase, and then remove from the target list and add to the self list in a second phase
-            items_to_be_removed = []
+            items_to_be_removed: list[item.Item] = []
             for item in target.inventory:
                 additional_result += self.add_item(item)
                 items_to_be_removed.append(item)
             for item in items_to_be_removed:
                 if item.is_equipped:
                     target.unequip(item)
-                print(f"target.remove_item({item}): {target.remove_item(item)}")
+                # debug
+                # print(f"\ttarget.remove_item({item}): {target.remove_item(item)}\n")
         
         # Start generating result string based on proposed damage.
         base_result = f"{self.name} deals {proposed_damage} damage to {target.name}, leaving {target.stats['health']} in remaining health for {target.name}.\n"
