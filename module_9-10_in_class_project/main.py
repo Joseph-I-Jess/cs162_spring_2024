@@ -206,6 +206,9 @@ def main():
 
     # we should remember to update the fight and attack commands to only allow us to attack things in the same location as we are in!
     # add ability to look at things in your location (including looking through an exit of the current location)
+    # be sure to change item drops from defeated enemies to drop in their current location
+    # remember to add locations to all the previously created objects
+    # should we dump our main and start fresh with our newly finished capabilities?
 
 if __name__ == "__main__":
     main()
